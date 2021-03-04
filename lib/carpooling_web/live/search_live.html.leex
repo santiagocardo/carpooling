@@ -1,0 +1,40 @@
+<section class="phx-hero">
+  <h1><%= gettext "%{name}!", name: "RideMe" %></h1>
+  <p>Transporte Solidario</p>
+
+  <form phx-change="suggest" phx-submit="search">
+    <div class="form">
+      <input
+        type="text"
+        name="origin"
+        value="<%= @origin_query %>"
+        placeholder="Origen"
+        list="origins"
+        autocomplete="off"
+        phx-debounce="700"
+      />
+      <datalist id="origins">
+        <%= for place <- @origins do %>
+          <option value="<%= place.title %>"><%= place.title %></option>
+        <% end %>
+      </datalist>
+
+      <input
+        type="text"
+        name="destination"
+        value="<%= @destination_query %>"
+        placeholder="Destino"
+        list="destinations"
+        autocomplete="off"
+        phx-debounce="700"
+      />
+      <datalist id="destinations">
+        <%= for place <- @destinations do %>
+          <option value="<%= place.title %>"><%= place.title %></option>
+        <% end %>
+      </datalist>
+
+      <button type="submit" phx-disable-with="Searching...">Buscar</button>
+    </div>
+  </form>
+</section>
