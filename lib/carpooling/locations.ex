@@ -7,14 +7,42 @@ defmodule Carpooling.Locations do
 
   alias Carpooling.Locations.Cache
 
+  def get_locations_and_zipcode(query) do
+    query
+    |> search()
+    |> attach_zipcode()
+  end
+
+  defp search(query) do
+    if not CarpoolingWeb.Endpoint.config(:code_reloader) do
+      raise "action disabled when not in development"
+    end
+
+    if String.length(query) >= 5 do
+      compute(query, [])
+      |> Enum.map(fn item -> item.locations end)
+      |> List.flatten()
+    else
+      []
+    end
+  end
+
+  defp attach_zipcode(locations) do
+    zipcode =
+      case Enum.at(locations, 0) do
+        %{address: %{"postalCode" => zipcode}} -> zipcode
+        _ -> ""
+      end
+
+    {locations, zipcode}
+  end
+
   def compute(query, opts \\ []) do
     timeout = opts[:timeout] || 10_000
     opts = Keyword.put_new(opts, :limit, 10)
     backends = opts[:backends] || @backends
 
     {uncached_backends, cached_results} = fetch_cached_results(backends, query, opts)
-
-    IO.inspect({uncached_backends, cached_results})
 
     uncached_backends
     |> Enum.map(&async_query(&1, query, opts))

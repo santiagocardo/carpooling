@@ -7,7 +7,7 @@
       <input
         type="text"
         name="origin"
-        value="<%= @origin_query %>"
+        value="<%= @origin %>"
         placeholder="Origen"
         list="origins"
         autocomplete="off"
@@ -18,11 +18,12 @@
           <option value="<%= place.title %>"><%= place.title %></option>
         <% end %>
       </datalist>
+      <input id="origin" name="origin_zipcode" type="hidden" value="<%= @origin_zipcode %>">
 
       <input
         type="text"
         name="destination"
-        value="<%= @destination_query %>"
+        value="<%= @destination %>"
         placeholder="Destino"
         list="destinations"
         autocomplete="off"
@@ -33,6 +34,7 @@
           <option value="<%= place.title %>"><%= place.title %></option>
         <% end %>
       </datalist>
+      <input id="destination" name="destination_zipcode" type="hidden" value="<%= @destination_zipcode %>">
 
       <button type="submit" phx-disable-with="Searching...">Buscar</button>
     </div>

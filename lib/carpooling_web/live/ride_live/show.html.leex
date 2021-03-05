@@ -1,0 +1,42 @@
+<h1>Show Ride</h1>
+
+<%= if @live_action in [:edit] do %>
+  <%= live_modal @socket, CarpoolingWeb.RideLive.FormComponent,
+    id: @ride.id,
+    title: @page_title,
+    action: @live_action,
+    ride: @ride,
+    return_to: Routes.ride_show_path(@socket, :show, @ride) %>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Origen</strong>
+    <%= @ride.origin %>
+  </li>
+
+  <li>
+    <strong>Destino</strong>
+    <%= @ride.destination %>
+  </li>
+
+  <li>
+    <strong>Fecha:</strong>
+    <%= @ride.date %>
+  </li>
+
+  <li>
+    <strong>Sillas Disponibles:</strong>
+    <%= @ride.seats %>
+  </li>
+
+  <li>
+    <strong>Aporte Solidario:</strong>
+    <%= @ride.cost %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.ride_show_path(@socket, :edit, @ride), class: "button" %></span>
+<span><%= live_redirect "Back", to: Routes.ride_index_path(@socket, :index) %></span>

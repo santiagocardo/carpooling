@@ -1,0 +1,44 @@
+<h2><%= @title %></h2>
+
+<%= f = form_for @changeset, "#",
+  id: "ride-form",
+  phx_target: @myself,
+  phx_change: "validate",
+  phx_submit: "save" %>
+
+  <%= label f, :origin, "Origen" %>
+  <%= text_input f, :origin, phx_debounce: 700, list: "origins", autocomplete: "off" %>
+  <%= error_tag f, :origin %>
+  <datalist id="origins">
+    <%= for place <- @origins do %>
+      <option value="<%= place.title %>"><%= place.title %></option>
+    <% end %>
+  </datalist>
+
+  <%= hidden_input(f, :origin_zipcode) %>
+
+  <%= label f, :destination, "Destino" %>
+  <%= text_input f, :destination, phx_debounce: 700, list: "destinations", autocomplete: "off" %>
+  <%= error_tag f, :destination %>
+  <datalist id="destinations">
+    <%= for place <- @destinations do %>
+      <option value="<%= place.title %>"><%= place.title %></option>
+    <% end %>
+  </datalist>
+
+  <%= hidden_input(f, :destination_zipcode) %>
+
+  <%= label f, :date, "Fecha" %>
+  <%= datetime_select f, :date %>
+  <%= error_tag f, :date %>
+
+  <%= label f, :seats, "Sillas Disponibles" %>
+  <%= number_input f, :seats %>
+  <%= error_tag f, :seats %>
+
+  <%= label f, :cost, "Aporte Solidario" %>
+  <%= number_input f, :cost %>
+  <%= error_tag f, :cost %>
+
+  <%= submit "Save", phx_disable_with: "Saving..." %>
+</form>
