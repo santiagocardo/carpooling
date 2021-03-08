@@ -40,3 +40,38 @@
     </div>
   </form>
 </section>
+
+<%= if @results do %>
+  <section>
+    <table>
+      <thead>
+        <tr>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Fecha</th>
+          <th>Sillas Disponibles</th>
+          <th>Aporte Solidario</th>
+
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rides">
+        <%= for ride <- @results do %>
+          <tr id="ride-<%= ride.id %>">
+            <td><%= ride.origin %></td>
+            <td><%= ride.destination %></td>
+            <td><%= ride.date %></td>
+            <td><%= ride.seats %></td>
+            <td><%= ride.cost %></td>
+
+            <td>
+              <span><%= live_redirect "Show", to: Routes.ride_show_path(@socket, :show, ride) %></span>
+              <span><%= live_patch "Edit", to: Routes.ride_index_path(@socket, :edit, ride) %></span>
+              <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: ride.id, data: [confirm: "Are you sure?"] %></span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+<% end %>

@@ -15,5 +15,6 @@ defmodule Carpooling.ZipCodes.ZipCode do
     zip_code
     |> cast(attrs, all_fields)
     |> validate_required(all_fields)
+    |> validate_length(:zip_code, min: 5, max: 6)
   end
 end

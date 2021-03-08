@@ -4,9 +4,7 @@ defmodule Carpooling.Rides do
   """
 
   import Ecto.Query, warn: false
-  alias Carpooling.Repo
-
-  alias Carpooling.Rides.Ride
+  alias Carpooling.{Rides.Ride, Repo, ZipCodes}
 
   @doc """
   Returns the list of rides.
@@ -100,5 +98,27 @@ defmodule Carpooling.Rides do
   """
   def change_ride(%Ride{} = ride, attrs \\ %{}) do
     Ride.changeset(ride, attrs)
+  end
+
+  def get_rides_in_radius(origin_zipcode, destination_zipcode, radius_in_miles) do
+    origin_zipcodes_in_radius = get_zipcodes_in_radius(origin_zipcode, radius_in_miles)
+    destination_zipcodes_in_radius = get_zipcodes_in_radius(destination_zipcode, radius_in_miles)
+
+    query =
+      from ride in Ride,
+        where:
+          ride.origin_zipcode in ^origin_zipcodes_in_radius and
+            ride.destination_zipcode in ^destination_zipcodes_in_radius
+
+    Repo.all(query)
+  end
+
+  defp get_zipcodes_in_radius(zipcode, radius_in_miles) do
+    zipcode
+    |> ZipCodes.get_zip_codes_in_radius(radius_in_miles)
+    |> case do
+      {:ok, zip_codes} -> Enum.map(zip_codes, & &1.zip_code)
+      error -> error
+    end
   end
 end

@@ -18,12 +18,12 @@ defmodule CarpoolingWeb.Router do
     pipe_through :browser
 
     live "/", SearchLive, :index
-    live "/rides", RideLive.Index, :index
-    live "/rides/new", RideLive.Index, :new
-    live "/rides/:id/edit", RideLive.Index, :edit
+    live "/rutas", RideLive.Index, :index
+    live "/rutas/nueva", RideLive.Index, :new
+    live "/rutas/:id/editar", RideLive.Index, :edit
 
-    live "/rides/:id", RideLive.Show, :show
-    live "/rides/:id/show/edit", RideLive.Show, :edit
+    live "/rutas/:id", RideLive.Show, :show
+    live "/rutas/:id/ver/editar", RideLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.

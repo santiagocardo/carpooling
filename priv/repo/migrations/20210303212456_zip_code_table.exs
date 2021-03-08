@@ -1,13 +1,11 @@
 defmodule Carpooling.Repo.Migrations.ZipCodeTable do
   use Ecto.Migration
 
-  alias Carpooling.ZipCodes.ZipCode
-
   def up do
     execute("CREATE EXTENSION IF NOT EXISTS postgis")
 
     create table(:zip_codes) do
-      add :zip_code, :string, size: 5, null: false
+      add :zip_code, :string, null: false
       add :city, :string, null: false
       add :state, :string, size: 2, null: false
     end
@@ -16,35 +14,6 @@ defmodule Carpooling.Repo.Migrations.ZipCodeTable do
     execute("CREATE INDEX zip_code_point_index on zip_codes USING gist (point)")
 
     create unique_index(:zip_codes, [:zip_code])
-
-    flush()
-
-    "#{__DIR__}/../wa_zip_codes.csv"
-    |> File.read!()
-    |> String.split("\n")
-    |> Enum.filter(fn line -> String.trim(line) != "" end)
-    |> Enum.map(fn csv_line ->
-      [zip, city, state, lat, long, _tz, _dst] =
-        csv_line
-        |> String.replace("\"", "")
-        |> String.replace("\n", "")
-        |> String.split(",")
-
-      city = String.downcase(city)
-      state = String.downcase(state)
-
-      attrs = %{
-        zip_code: zip,
-        city: city,
-        state: state,
-        point: %Geo.Point{coordinates: {long, lat}, srid: 4326},
-      }
-
-      ZipCode.changeset(%ZipCode{}, attrs)
-    end)
-    |> Enum.each(fn zip_code_changeset ->
-      Carpooling.Repo.insert(zip_code_changeset, on_conflict: :nothing)
-    end)
   end
 
   def down do

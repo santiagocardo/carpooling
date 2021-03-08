@@ -1,4 +1,5 @@
 defmodule Carpooling.ZipCodes do
+  import Ecto.Query, warn: false
   alias Carpooling.{Repo, ZipCodes.ZipCode}
 
   def get_zip_codes_in_radius(zip_code, radius_in_miles) do
@@ -27,6 +28,18 @@ defmodule Carpooling.ZipCodes do
 
       _ ->
         {:error, :not_found}
+    end
+  end
+
+  def validate_or_create_zip_code(attrs) do
+    case Repo.exists?(from z in ZipCode, where: z.zip_code == ^attrs.zip_code) do
+      false ->
+        %ZipCode{}
+        |> ZipCode.changeset(attrs)
+        |> Repo.insert()
+
+      true ->
+        {:ok, :already_exists}
     end
   end
 

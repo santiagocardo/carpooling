@@ -1,8 +1,7 @@
 defmodule CarpoolingWeb.RideLive.Index do
   use CarpoolingWeb, :live_view
 
-  alias Carpooling.Rides
-  alias Carpooling.Rides.Ride
+  alias Carpooling.{Rides, Rides.Ride}
 
   @impl true
   def mount(_params, _session, socket) do

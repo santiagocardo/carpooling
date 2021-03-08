@@ -7,10 +7,10 @@ defmodule Carpooling.Locations do
 
   alias Carpooling.Locations.Cache
 
-  def get_locations_and_zipcode(query) do
+  def get_locations(query) do
     query
     |> search()
-    |> attach_zipcode()
+    |> attach_current_location()
   end
 
   defp search(query) do
@@ -27,14 +27,14 @@ defmodule Carpooling.Locations do
     end
   end
 
-  defp attach_zipcode(locations) do
-    zipcode =
+  defp attach_current_location(locations) do
+    current_location =
       case Enum.at(locations, 0) do
-        %{address: %{"postalCode" => zipcode}} -> zipcode
-        _ -> ""
+        %{address: %{"postalCode" => _}} = location -> location
+        _ -> %{address: %{"postalCode" => ""}}
       end
 
-    {locations, zipcode}
+    {locations, current_location}
   end
 
   def compute(query, opts \\ []) do
