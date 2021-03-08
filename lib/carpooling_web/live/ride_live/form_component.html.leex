@@ -40,5 +40,17 @@
   <%= number_input f, :cost %>
   <%= error_tag f, :cost %>
 
+  <%= if @action == :new do %>
+    <%= label f, :phone, "WhatsApp" %>
+    <%= telephone_input f, :phone %>
+    <%= error_tag f, :phone %>
+  <% end %>
+
+  <%= if @action == :edit do %>
+    <%= label f, :code, "Código de Verificación" %>
+    <%= text_input f, :code %>
+    <%= error_tag f, :code %>
+  <% end %>
+
   <%= submit "Save", phx_disable_with: "Saving..." %>
 </form>

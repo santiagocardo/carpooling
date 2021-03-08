@@ -1,7 +1,7 @@
 defmodule CarpoolingWeb.RideLive.FormComponent do
   use CarpoolingWeb, :live_component
 
-  alias Carpooling.{Rides, Locations, ZipCodes}
+  alias Carpooling.{Rides, Locations, ZipCodes, Accounts}
 
   @impl true
   def update(%{ride: ride} = assigns, socket) do
@@ -50,6 +50,14 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
       [{:ok, _}, {:ok, _}] ->
         save_ride(socket, socket.assigns.action, ride_params)
 
+      {:error, :missing_location} ->
+        changeset =
+          socket.assigns.ride
+          |> Rides.change_ride(ride_params)
+          |> Map.put(:action, :validate)
+
+        {:noreply, assign(socket, :changeset, changeset)}
+
       _ ->
         {:noreply,
          socket
@@ -59,30 +67,73 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
   end
 
   defp save_ride(socket, :edit, ride_params) do
-    case Rides.update_ride(socket.assigns.ride, ride_params) do
-      {:ok, _ride} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Ride updated successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
+    ride = Rides.get_ride!(socket.assigns.id)
 
-      {:error, %Ecto.Changeset{} = changeset} ->
+    code =
+      case ride_params["code"] |> Integer.parse() do
+        :error -> 0
+        {num, _} -> num
+      end
+
+    case ride.verification_code == code do
+      true ->
+        case Rides.update_ride(socket.assigns.ride, ride_params) do
+          {:ok, _ride} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Ruta editada exitosamente!")
+             |> push_redirect(to: socket.assigns.return_to)}
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            {:noreply, assign(socket, :changeset, changeset)}
+        end
+
+      _ ->
+        changeset = %Ecto.Changeset{
+          action: :validate,
+          errors: [
+            code: {"código de verificación inválido!", []}
+          ],
+          data: ride,
+          valid?: false
+        }
+
         {:noreply, assign(socket, :changeset, changeset)}
     end
   end
 
   defp save_ride(socket, :new, ride_params) do
+    ride_params = Map.put(ride_params, "verification_code", Enum.random(1_000..9_999))
+
     case Rides.create_ride(ride_params) do
-      {:ok, _ride} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Ride created successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
+      {:ok, ride} ->
+        driver = %{
+          role: "driver",
+          phone: ride_params["phone"],
+          ride_id: ride.id
+        }
+
+        case Accounts.create_user(driver) do
+          {:ok, _user} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Ruta creada exitosamente!")
+             |> push_redirect(to: socket.assigns.return_to)}
+
+          _ ->
+            {:noreply,
+             socket
+             |> put_flash(:error, "Oops, Algo malo ha ocurrido!")
+             |> push_redirect(to: socket.assigns.return_to)}
+        end
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
     end
   end
+
+  def feed_locations(%{"origin" => ""}), do: {:error, :missing_location}
+  def feed_locations(%{"destination" => ""}), do: {:error, :missing_location}
 
   def feed_locations(%{"origin" => origin, "destination" => destination}) do
     {_origins, origin_location} = Locations.get_locations(origin)

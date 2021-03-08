@@ -12,6 +12,8 @@ defmodule Carpooling.Rides.Ride do
     field :origin_zipcode, :string
     field :seats, :integer
     field :verification_code, :integer
+    field :phone, :string, virtual: true
+    field :code, :string, virtual: true
 
     has_many :users, Carpooling.Accounts.User
 
@@ -42,7 +44,25 @@ defmodule Carpooling.Rides.Ride do
       :cost
     ])
     |> validate_number(:seats, greater_than: 0, less_than: 5)
+    |> validate_length(:origin, min: 5)
+    |> validate_length(:destination, min: 5)
     |> validate_length(:origin_zipcode, min: 5, max: 6)
     |> validate_length(:destination_zipcode, min: 5, max: 6)
+  end
+
+  def create_changeset(ride, attrs) do
+    ride
+    |> changeset(attrs)
+    |> cast(attrs, [:phone])
+    |> validate_required([:phone])
+    |> validate_length(:phone, min: 10, max: 13)
+  end
+
+  def update_changeset(ride, attrs) do
+    ride
+    |> changeset(attrs)
+    |> cast(attrs, [:code])
+    |> validate_required([:code])
+    |> validate_length(:code, is: 4)
   end
 end
