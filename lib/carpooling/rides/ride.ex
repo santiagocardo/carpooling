@@ -13,7 +13,6 @@ defmodule Carpooling.Rides.Ride do
     field :seats, :integer
     field :verification_code, :integer
     field :phone, :string, virtual: true
-    field :code, :string, virtual: true
 
     has_many :users, Carpooling.Accounts.User
 
@@ -48,6 +47,8 @@ defmodule Carpooling.Rides.Ride do
     |> validate_length(:destination, min: 5)
     |> validate_length(:origin_zipcode, min: 5, max: 6)
     |> validate_length(:destination_zipcode, min: 5, max: 6)
+    |> validate_zipcode(:origin)
+    |> validate_zipcode(:destination)
   end
 
   def create_changeset(ride, attrs) do
@@ -58,11 +59,26 @@ defmodule Carpooling.Rides.Ride do
     |> validate_length(:phone, min: 10, max: 13)
   end
 
-  def update_changeset(ride, attrs) do
-    ride
-    |> changeset(attrs)
-    |> cast(attrs, [:code])
-    |> validate_required([:code])
-    |> validate_length(:code, is: 4)
+  defp validate_zipcode(%Ecto.Changeset{errors: errors} = changeset, location) do
+    location_zipcode =
+      (Atom.to_string(location) <> "_zipcode")
+      |> String.to_atom()
+
+    case List.keyfind(errors, location, 0) do
+      nil ->
+        case List.keyfind(errors, location_zipcode, 0) do
+          nil ->
+            changeset
+
+          _ ->
+            errors = List.insert_at(errors, -1, {location, {"ubicación inválida", []}})
+
+            changeset
+            |> Map.put(:errors, errors)
+        end
+
+      _ ->
+        changeset
+    end
   end
 end

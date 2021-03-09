@@ -67,7 +67,7 @@ defmodule Carpooling.Rides do
   """
   def update_ride(%Ride{} = ride, attrs) do
     ride
-    |> Ride.update_changeset(attrs)
+    |> Ride.changeset(attrs)
     |> Repo.update()
   end
 
@@ -98,10 +98,6 @@ defmodule Carpooling.Rides do
   """
   def change_ride(%Ride{} = ride, attrs \\ %{}) do
     Ride.create_changeset(ride, attrs)
-  end
-
-  def change_updating(%Ride{} = ride, attrs \\ %{}) do
-    Ride.update_changeset(ride, attrs)
   end
 
   def get_rides_in_radius(origin_zipcode, destination_zipcode, radius_in_miles) do

@@ -132,24 +132,24 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
     end
   end
 
-  def feed_locations(%{"origin" => ""}), do: {:error, :missing_location}
-  def feed_locations(%{"destination" => ""}), do: {:error, :missing_location}
+  def feed_locations(%{"origin_zipcode" => ""}), do: {:error, :missing_location}
+  def feed_locations(%{"destination_zipcode" => ""}), do: {:error, :missing_location}
 
   def feed_locations(%{"origin" => origin, "destination" => destination}) do
     {_origins, origin_location} = Locations.get_locations(origin)
     {_destinations, destination_location} = Locations.get_locations(destination)
 
     [origin_location, destination_location]
-    |> Enum.map(fn location -> parse_and_feed_location(location) end)
+    |> Enum.map(&map_and_feed_locations/1)
   end
 
-  defp parse_and_feed_location(location) do
+  defp map_and_feed_locations(location) do
     location
-    |> parse_location()
+    |> map_location()
     |> ZipCodes.validate_or_create_zip_code()
   end
 
-  defp parse_location(location) do
+  defp map_location(location) do
     %{
       address: %{
         "postalCode" => zip_code,
