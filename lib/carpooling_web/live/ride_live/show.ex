@@ -1,21 +1,65 @@
 defmodule CarpoolingWeb.RideLive.Show do
   use CarpoolingWeb, :live_view
 
-  alias Carpooling.Rides
+  alias Carpooling.{Rides, Accounts, Accounts.User}
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    changeset = Accounts.change_user(%User{})
+
+    {:ok,
+     socket
+     |> assign(:user, %User{})
+     |> assign(:changeset, changeset)}
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
-    {:noreply,
-     socket
-     |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> assign(:ride, Rides.get_ride!(id))}
+  def handle_params(%{"id" => id}, _url, socket) do
+    ride = Rides.get_ride!(id)
+
+    case ride.is_verified and ride.seats < 4 do
+      true ->
+        {:noreply,
+         socket
+         |> assign(:page_title, "Ver Ruta")
+         |> assign(:ride, ride)}
+
+      false ->
+        {:noreply,
+         socket
+         |> push_redirect(to: Routes.search_path(socket, :index))}
+    end
   end
 
-  defp page_title(:show), do: "Show Ride"
-  defp page_title(:edit), do: "Edit Ride"
+  @impl true
+  def handle_event("validate", %{"user" => user_params}, socket) do
+    changeset =
+      socket.assigns.user
+      |> Accounts.change_user(user_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  @impl true
+  def handle_event("save", %{"user" => user_params}, socket) do
+    user_params =
+      Map.merge(user_params, %{
+        "role" => "passenger",
+        "ride_id" => socket.assigns.ride.id,
+        "verification_code" => Enum.random(1_000..9_999),
+        "is_verified" => false
+      })
+
+    case Accounts.create_user(user_params) do
+      {:ok, user} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Ruta asignada exitosamente!")
+         |> push_redirect(to: Routes.verify_path(socket, :user, user.id))}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
 end

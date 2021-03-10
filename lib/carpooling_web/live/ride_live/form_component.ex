@@ -67,7 +67,7 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
   end
 
   defp save_ride(socket, :edit, ride_params) do
-    ride = Rides.get_ride!(socket.assigns.id)
+    ride = socket.assigns.ride
 
     code =
       case ride_params["code"] |> Integer.parse() do
@@ -77,7 +77,7 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
 
     case ride.verification_code == code do
       true ->
-        case Rides.update_ride(socket.assigns.ride, ride_params) do
+        case Rides.update_ride(ride, ride_params) do
           {:ok, _ride} ->
             {:noreply,
              socket
@@ -103,14 +103,17 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
   end
 
   defp save_ride(socket, :new, ride_params) do
-    ride_params = Map.put(ride_params, "verification_code", Enum.random(1_000..9_999))
+    verification_code = Enum.random(1_000..9_999)
+    ride_params = Map.put(ride_params, "verification_code", verification_code)
 
     case Rides.create_ride(ride_params) do
       {:ok, ride} ->
         driver = %{
           role: "driver",
           phone: ride_params["phone"],
-          ride_id: ride.id
+          ride_id: ride.id,
+          verification_code: verification_code,
+          is_verified: true
         }
 
         case Accounts.create_user(driver) do
@@ -118,7 +121,7 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
             {:noreply,
              socket
              |> put_flash(:info, "Ruta creada exitosamente!")
-             |> push_redirect(to: socket.assigns.return_to)}
+             |> push_redirect(to: Routes.verify_path(socket, :ride, ride.id))}
 
           _ ->
             {:noreply,

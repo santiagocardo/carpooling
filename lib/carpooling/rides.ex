@@ -108,7 +108,9 @@ defmodule Carpooling.Rides do
       from ride in Ride,
         where:
           ride.origin_zipcode in ^origin_zipcodes_in_radius and
-            ride.destination_zipcode in ^destination_zipcodes_in_radius
+            ride.destination_zipcode in ^destination_zipcodes_in_radius and
+            ride.is_verified == true and
+            ride.seats < 4
 
     Repo.all(query)
   end

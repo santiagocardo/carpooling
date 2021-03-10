@@ -14,11 +14,19 @@ defmodule Carpooling.Accounts do
 
   def list_users, do: Repo.all(User)
 
-  def change_user(%User{} = user), do: User.changeset(user, %{})
+  def change_user(%User{} = user, attrs \\ %{}) do
+    User.changeset(user, attrs)
+  end
 
   def create_user(attrs \\ %{}) do
     %User{}
-    |> User.changeset(attrs)
+    |> User.creation_changeset(attrs)
     |> Repo.insert()
+  end
+
+  def update_user(%User{} = user, attrs) do
+    user
+    |> User.creation_changeset(attrs)
+    |> Repo.update()
   end
 end

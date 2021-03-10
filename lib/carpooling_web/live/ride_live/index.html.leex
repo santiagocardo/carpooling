@@ -17,6 +17,7 @@
       <th>Fecha</th>
       <th>Sillas Disponibles</th>
       <th>Aporte Solidario</th>
+      <th>Verificado</th>
 
       <th></th>
     </tr>
@@ -29,6 +30,7 @@
         <td><%= ride.date %></td>
         <td><%= ride.seats %></td>
         <td><%= ride.cost %></td>
+        <td><%= ride.is_verified %></td>
 
         <td>
           <span><%= live_redirect "Show", to: Routes.ride_show_path(@socket, :show, ride) %></span>

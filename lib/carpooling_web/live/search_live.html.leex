@@ -65,9 +65,7 @@
             <td><%= ride.cost %></td>
 
             <td>
-              <span><%= live_redirect "Show", to: Routes.ride_show_path(@socket, :show, ride) %></span>
-              <span><%= live_patch "Edit", to: Routes.ride_index_path(@socket, :edit, ride) %></span>
-              <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: ride.id, data: [confirm: "Are you sure?"] %></span>
+              <%= live_redirect "Tomar!", to: Routes.ride_show_path(@socket, :show, ride), class: "button" %>
             </td>
           </tr>
         <% end %>
