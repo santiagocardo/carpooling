@@ -5,6 +5,7 @@ defmodule Carpooling.Repo.Migrations.CreateUsers do
     create table(:users) do
       add :role, :string
       add :phone, :string
+      add :pickup_location, :string
       add :ride_id, references(:rides, on_delete: :delete_all)
       add :is_verified, :boolean, default: false, null: false
       add :verification_code, :integer, null: false

@@ -66,10 +66,19 @@ defmodule CarpoolingWeb.VerifyLive do
   defp update_entity(:user, user, socket) do
     case Accounts.update_user(user, %{"is_verified" => true}) do
       {:ok, _user} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Pasajero verificado exitosamente!")
-         |> push_redirect(to: Routes.ride_show_path(socket, :show, user.ride_id))}
+        case Rides.update_ride(user.ride, %{"seats" => user.ride.seats - 1}) do
+          {:ok, _ride} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Pasajero verificado exitosamente!")
+             |> push_redirect(to: Routes.ride_show_path(socket, :show, user.ride_id))}
+
+          _ ->
+            {:noreply,
+             socket
+             |> put_flash(:error, "Uups! Parece que esta ruta ya no tiene asientos disponibles!")
+             |> push_redirect(to: Routes.ride_show_path(socket, :show, user.ride_id))}
+        end
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -93,14 +102,14 @@ defmodule CarpoolingWeb.VerifyLive do
     user = Accounts.get_user!(user_id)
 
     case user.is_verified do
+      true ->
+        redirect(socket, :user, user.ride_id)
+
       false ->
         socket
         |> assign(:page_title, "Verificar Usuario")
         |> assign(:user, user)
         |> assign(:changeset, @user_changeset)
-
-      true ->
-        redirect(socket, :user, user.ride_id)
     end
   end
 
@@ -108,14 +117,14 @@ defmodule CarpoolingWeb.VerifyLive do
     ride = Rides.get_ride!(ride_id)
 
     case ride.is_verified do
+      true ->
+        redirect(socket, :ride, ride.id)
+
       false ->
         socket
         |> assign(:page_title, "Verificar Ruta")
         |> assign(:ride, ride)
         |> assign(:changeset, @ride_changeset)
-
-      true ->
-        redirect(socket, :ride, ride.id)
     end
   end
 

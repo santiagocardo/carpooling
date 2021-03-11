@@ -17,7 +17,7 @@ defmodule CarpoolingWeb.RideLive.Show do
   def handle_params(%{"id" => id}, _url, socket) do
     ride = Rides.get_ride!(id)
 
-    case ride.is_verified and ride.seats < 4 do
+    case ride.is_verified do
       true ->
         {:noreply,
          socket

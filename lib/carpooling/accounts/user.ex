@@ -5,6 +5,7 @@ defmodule Carpooling.Accounts.User do
   schema "users" do
     field :phone, :string
     field :role, :string
+    field :pickup_location, :string
     field :verification_code, :integer
     field :is_verified, :boolean, default: false
 
@@ -16,9 +17,10 @@ defmodule Carpooling.Accounts.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:phone])
-    |> validate_required([:phone])
+    |> cast(attrs, [:phone, :pickup_location])
+    |> validate_required([:phone, :pickup_location])
     |> validate_length(:phone, min: 10, max: 13)
+    |> validate_length(:pickup_location, min: 5, max: 20)
   end
 
   @doc false

@@ -110,7 +110,7 @@ defmodule Carpooling.Rides do
           ride.origin_zipcode in ^origin_zipcodes_in_radius and
             ride.destination_zipcode in ^destination_zipcodes_in_radius and
             ride.is_verified == true and
-            ride.seats < 4
+            ride.seats > 0
 
     Repo.all(query)
   end

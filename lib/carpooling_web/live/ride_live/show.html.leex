@@ -1,40 +1,50 @@
-<ul>
+<div class="row">
+  <div class="col-sm-12">
+    <ul>
+      <li>
+        <strong>Origen</strong>
+        <%= @ride.origin %>
+      </li>
 
-  <li>
-    <strong>Origen</strong>
-    <%= @ride.origin %>
-  </li>
+      <li>
+        <strong>Destino</strong>
+        <%= @ride.destination %>
+      </li>
 
-  <li>
-    <strong>Destino</strong>
-    <%= @ride.destination %>
-  </li>
+      <li>
+        <strong>Fecha:</strong>
+        <%= @ride.date %>
+      </li>
 
-  <li>
-    <strong>Fecha:</strong>
-    <%= @ride.date %>
-  </li>
+      <li>
+        <strong>Sillas Disponibles:</strong>
+        <%= @ride.seats %>
+      </li>
 
-  <li>
-    <strong>Sillas Disponibles:</strong>
-    <%= @ride.seats %>
-  </li>
+      <li>
+        <strong>Aporte Solidario:</strong>
+        <%= @ride.cost %>
+      </li>
+    </ul>
+  </div>
+  <%= if @ride.seats > 0 do %>
+    <div class="col-sm-6">
+      <%= f = form_for @changeset, "#",
+        phx_change: "validate",
+        phx_submit: "save" %>
 
-  <li>
-    <strong>Aporte Solidario:</strong>
-    <%= @ride.cost %>
-  </li>
+        <%= label f, :phone, "WhatsApp" %>
+        <%= telephone_input f, :phone %>
+        <%= error_tag f, :phone %>
 
-</ul>
+        <%= label f, :pickup_location, "Punto de Recogida" %>
+        <%= text_input f, :pickup_location %>
+        <%= error_tag f, :pickup_location %>
 
-<%= f = form_for @changeset, "#",
-  phx_change: "validate",
-  phx_submit: "save" %>
+        <%= submit "Vamos!", phx_disable_with: "Vamos..." %>
+      </form>
+    </div>
+  <% end %>
+</div>
 
-  <%= label f, :phone, "WhatsApp" %>
-  <%= telephone_input f, :phone %>
-  <%= error_tag f, :phone %>
-
-  <%= submit "Vamos!", phx_disable_with: "Vamos..." %>
-  <span><%= live_redirect "Volver", to: Routes.ride_index_path(@socket, :index) %></span>
-</form>
+<span><%= live_redirect "Volver", to: Routes.ride_index_path(@socket, :index) %></span>

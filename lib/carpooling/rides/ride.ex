@@ -42,7 +42,7 @@ defmodule Carpooling.Rides.Ride do
       :seats,
       :cost
     ])
-    |> validate_number(:seats, greater_than: 0, less_than: 5)
+    |> validate_number(:seats, greater_than: -1, less_than: 5)
     |> validate_length(:origin, min: 5)
     |> validate_length(:destination, min: 5)
     |> validate_length(:origin_zipcode, min: 5, max: 6)

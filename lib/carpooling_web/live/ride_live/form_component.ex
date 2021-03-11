@@ -113,7 +113,8 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
           phone: ride_params["phone"],
           ride_id: ride.id,
           verification_code: verification_code,
-          is_verified: true
+          is_verified: true,
+          pickup_location: "driver location"
         }
 
         case Accounts.create_user(driver) do
