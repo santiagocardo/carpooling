@@ -35,6 +35,8 @@ defmodule Carpooling.Rides do
   """
   def get_ride!(id), do: Repo.get!(Ride, id)
 
+  def get_ride(id), do: Repo.get(Ride, id)
+
   @doc """
   Creates a ride.
 

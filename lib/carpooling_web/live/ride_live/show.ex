@@ -15,19 +15,15 @@ defmodule CarpoolingWeb.RideLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _url, socket) do
-    ride = Rides.get_ride!(id)
-
-    case ride.is_verified do
-      true ->
+    case Rides.get_ride(id) do
+      %{is_verified: true} = ride ->
         {:noreply,
          socket
          |> assign(:page_title, "Ver Ruta")
          |> assign(:ride, ride)}
 
-      false ->
-        {:noreply,
-         socket
-         |> push_redirect(to: Routes.search_path(socket, :index))}
+      _ ->
+        push_redirect(socket, to: Routes.search_path(socket, :index))
     end
   end
 

@@ -6,7 +6,10 @@ defmodule Carpooling.Accounts do
     Repo.all(from(u in User, where: u.id in ^ids))
   end
 
-  def get_user(id), do: Repo.get(User, id)
+  def get_user(id) do
+    Repo.get(User, id)
+    |> Repo.preload(:ride)
+  end
 
   def get_user!(id) do
     Repo.get!(User, id)
@@ -31,5 +34,9 @@ defmodule Carpooling.Accounts do
     user
     |> User.creation_changeset(attrs)
     |> Repo.update()
+  end
+
+  def delete_user(%User{} = user) do
+    Repo.delete(user)
   end
 end

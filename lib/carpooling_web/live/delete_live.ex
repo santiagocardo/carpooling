@@ -1,4 +1,4 @@
-defmodule CarpoolingWeb.VerifyLive do
+defmodule CarpoolingWeb.DeleteLive do
   use CarpoolingWeb, :live_view
 
   alias Carpooling.{Rides, Accounts}
@@ -54,29 +54,35 @@ defmodule CarpoolingWeb.VerifyLive do
   end
 
   defp validate_code(code, {entity_id, entity}, socket) do
-    case entity.verification_code == code do
+    verification_code =
+      case entity_id do
+        :user -> entity.ride.verification_code
+        :ride -> entity.verification_code
+      end
+
+    case verification_code == code do
       true ->
-        update_entity(entity_id, entity, socket)
+        delete_entity(entity_id, entity, socket)
 
       _ ->
         {:noreply, assign(socket, :changeset, invalid_code_changeset(entity))}
     end
   end
 
-  defp update_entity(:user, user, socket) do
-    case Accounts.update_user(user, %{"is_verified" => true}) do
+  defp delete_entity(:user, user, socket) do
+    case Accounts.delete_user(user) do
       {:ok, _user} ->
-        case Rides.update_ride(user.ride, %{"seats" => user.ride.seats - 1}) do
+        case Rides.update_ride(user.ride, %{"seats" => user.ride.seats + 1}) do
           {:ok, _ride} ->
             {:noreply,
              socket
-             |> put_flash(:info, "Pasajero verificado exitosamente!")
+             |> put_flash(:info, "Pasajero eliminado exitosamente!")
              |> push_redirect(to: Routes.ride_show_path(socket, :show, user.ride_id))}
 
           _ ->
             {:noreply,
              socket
-             |> put_flash(:error, "Uups! Parece que esta ruta ya no tiene asientos disponibles!")
+             |> put_flash(:error, "Uups! Parece que hubo un problema!")
              |> push_redirect(to: Routes.ride_show_path(socket, :show, user.ride_id))}
         end
 
@@ -85,13 +91,13 @@ defmodule CarpoolingWeb.VerifyLive do
     end
   end
 
-  defp update_entity(:ride, ride, socket) do
-    case Rides.update_ride(ride, %{"is_verified" => true}) do
+  defp delete_entity(:ride, ride, socket) do
+    case Rides.delete_ride(ride) do
       {:ok, _ride} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Ruta verificada exitosamente!")
-         |> push_redirect(to: Routes.ride_show_path(socket, :show, ride.id))}
+         |> put_flash(:info, "Ruta eliminada exitosamente!")
+         |> push_redirect(to: Routes.search_path(socket, :index))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -101,45 +107,49 @@ defmodule CarpoolingWeb.VerifyLive do
   defp apply_action(socket, :user, %{"id" => user_id}) do
     case Accounts.get_user(user_id) do
       nil ->
-        push_redirect(socket, to: Routes.search_path(socket, :index))
-
-      %{is_verified: true} = user ->
-        flash_message_and_redirect(socket, :user, user.ride_id)
+        flash_message_and_redirect(socket, :user)
 
       user ->
-        socket
-        |> assign(:page_title, "Verificar Pasajero")
-        |> assign(:user, user)
-        |> assign(:changeset, @user_changeset)
+        case user do
+          %{role: "driver"} ->
+            flash_message_and_redirect(socket, :driver)
+
+          %{is_verified: false} ->
+            flash_message_and_redirect(socket, :user)
+
+          _ ->
+            socket
+            |> assign(:page_title, "Eliminar Pasajero")
+            |> assign(:user, user)
+            |> assign(:changeset, @user_changeset)
+        end
     end
   end
 
   defp apply_action(socket, :ride, %{"id" => ride_id}) do
     case Rides.get_ride(ride_id) do
       nil ->
-        push_redirect(socket, to: Routes.search_path(socket, :index))
-
-      %{is_verified: true} = ride ->
-        flash_message_and_redirect(socket, :ride, ride.id)
+        flash_message_and_redirect(socket, :ride)
 
       ride ->
         socket
-        |> assign(:page_title, "Verificar Ruta")
+        |> assign(:page_title, "Eliminar Ruta")
         |> assign(:ride, ride)
         |> assign(:changeset, @ride_changeset)
     end
   end
 
-  defp flash_message_and_redirect(socket, entity_id, id) do
+  defp flash_message_and_redirect(socket, entity_id) do
     msg =
       case entity_id do
-        :user -> "Pasajero ya verificado!"
-        :ride -> "Ruta ya verificada!"
+        :user -> "Pasajero inexistente!"
+        :ride -> "Ruta inexistente!"
+        :driver -> "No se puede eliminar conductor. Para ello se debe eliminar la ruta!"
       end
 
     socket
     |> put_flash(:info, msg)
-    |> push_redirect(to: Routes.ride_show_path(socket, :show, id))
+    |> push_redirect(to: Routes.search_path(socket, :index))
   end
 
   defp parse_code(code) do

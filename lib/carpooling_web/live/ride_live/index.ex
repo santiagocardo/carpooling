@@ -14,9 +14,15 @@ defmodule CarpoolingWeb.RideLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, "Editar Ruta")
-    |> assign(:ride, Rides.get_ride!(id))
+    case Rides.get_ride(id) do
+      %{is_verified: true} = ride ->
+        socket
+        |> assign(:page_title, "Editar Ruta")
+        |> assign(:ride, ride)
+
+      _ ->
+        push_redirect(socket, to: Routes.search_path(socket, :index))
+    end
   end
 
   defp apply_action(socket, :new, _params) do

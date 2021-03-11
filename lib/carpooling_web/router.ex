@@ -22,10 +22,12 @@ defmodule CarpoolingWeb.Router do
     live "/rutas/nueva", RideLive.Index, :new
     live "/rutas/:id/editar", RideLive.Index, :edit
     live "/rutas/:id/verificar", VerifyLive, :ride
+    live "/rutas/:id/eliminar", DeleteLive, :ride
 
     live "/rutas/:id", RideLive.Show, :show
 
     live "/usuario/:id/verificar", VerifyLive, :user
+    live "/usuario/:id/eliminar", DeleteLive, :user
   end
 
   # Other scopes may use custom stacks.
