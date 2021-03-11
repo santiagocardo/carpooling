@@ -3,6 +3,14 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
 
   alias Carpooling.{Rides, Locations, ZipCodes, Accounts}
 
+  @invalid_code_changeset %Ecto.Changeset{
+    action: :validate,
+    errors: [
+      code: {"código de verificación inválido!", []}
+    ],
+    valid?: false
+  }
+
   @impl true
   def update(%{ride: ride} = assigns, socket) do
     changeset = Rides.change_ride(ride)
@@ -45,6 +53,7 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
      )}
   end
 
+  @impl true
   def handle_event("save", %{"ride" => ride_params}, socket) do
     case feed_locations(ride_params) do
       [{:ok, _}, {:ok, _}] ->
@@ -61,19 +70,14 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
       _ ->
         {:noreply,
          socket
-         |> put_flash(:error, "Oops, Algo malo ha ocurrido!")
+         |> put_flash(:error, "Uups, Algo ha ocurrido mal!")
          |> push_redirect(to: socket.assigns.return_to)}
     end
   end
 
   defp save_ride(socket, :edit, ride_params) do
     ride = socket.assigns.ride
-
-    code =
-      case ride_params["code"] |> Integer.parse() do
-        :error -> 0
-        {num, _} -> num
-      end
+    code = parse_code(ride_params["code"])
 
     case ride.verification_code == code do
       true ->
@@ -89,14 +93,7 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
         end
 
       _ ->
-        changeset = %Ecto.Changeset{
-          action: :validate,
-          errors: [
-            code: {"código de verificación inválido!", []}
-          ],
-          data: ride,
-          valid?: false
-        }
+        changeset = Map.put(@invalid_code_changeset, :data, ride)
 
         {:noreply, assign(socket, :changeset, changeset)}
     end
@@ -117,22 +114,26 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
           pickup_location: "driver location"
         }
 
-        case Accounts.create_user(driver) do
-          {:ok, _user} ->
-            {:noreply,
-             socket
-             |> put_flash(:info, "Ruta creada exitosamente!")
-             |> push_redirect(to: Routes.verify_path(socket, :ride, ride.id))}
-
-          _ ->
-            {:noreply,
-             socket
-             |> put_flash(:error, "Oops, Algo malo ha ocurrido!")
-             |> push_redirect(to: socket.assigns.return_to)}
-        end
+        create_driver_and_redirect(driver, socket)
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+
+  defp create_driver_and_redirect(driver, socket) do
+    case Accounts.create_user(driver) do
+      {:ok, _user} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Ruta creada exitosamente!")
+         |> push_redirect(to: Routes.verify_path(socket, :ride, driver.ride_id))}
+
+      _ ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Uups, Algo ha ocurrido mal!")
+         |> push_redirect(to: socket.assigns.return_to)}
     end
   end
 
@@ -175,5 +176,12 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
       zip_code: zip_code,
       point: %Geo.Point{coordinates: {lng, lat}, srid: 4326}
     }
+  end
+
+  defp parse_code(code) do
+    case Integer.parse(code) do
+      :error -> 0
+      {num, _} -> num
+    end
   end
 end
