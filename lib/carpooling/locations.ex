@@ -7,19 +7,18 @@ defmodule Carpooling.Locations do
 
   alias Carpooling.Locations.Cache
 
-  def get_locations(query) do
-    query
-    |> search()
+  def get_locations(query, point) do
+    search(query, point)
     |> attach_current_location()
   end
 
-  defp search(query) do
+  defp search(query, point) do
     if not CarpoolingWeb.Endpoint.config(:code_reloader) do
       raise "action disabled when not in development"
     end
 
     if String.length(query) >= 5 do
-      compute(query, [])
+      compute(query, point, [])
       |> Enum.map(fn item -> item.locations end)
       |> List.flatten()
     else
@@ -37,7 +36,7 @@ defmodule Carpooling.Locations do
     {locations, current_location}
   end
 
-  def compute(query, opts \\ []) do
+  def compute(query, point, opts \\ []) do
     timeout = opts[:timeout] || 10_000
     opts = Keyword.put_new(opts, :limit, 10)
     backends = opts[:backends] || @backends
@@ -45,7 +44,7 @@ defmodule Carpooling.Locations do
     {uncached_backends, cached_results} = fetch_cached_results(backends, query, opts)
 
     uncached_backends
-    |> Enum.map(&async_query(&1, query, opts))
+    |> Enum.map(&async_query(&1, query, point, opts))
     |> Task.yield_many(timeout)
     |> Enum.map(fn {task, res} ->
       res || Task.shutdown(task, :brutal_kill)
@@ -86,8 +85,12 @@ defmodule Carpooling.Locations do
     end)
   end
 
-  defp async_query(backend, query, opts) do
-    Task.Supervisor.async_nolink(Carpooling.TaskSupervisor, backend, :compute, [query, opts],
+  defp async_query(backend, query, point, opts) do
+    Task.Supervisor.async_nolink(
+      Carpooling.TaskSupervisor,
+      backend,
+      :compute,
+      [query, point, opts],
       shutdown: :brutal_kill
     )
   end

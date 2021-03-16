@@ -3,28 +3,32 @@ defmodule Carpooling.Locations.HereMaps do
 
   @behaviour Carpooling.Locations.Backend
 
-  @base "https://geocode.search.hereapi.com/v1/geocode"
+  @base "https://discover.search.hereapi.com/v1/discover"
 
   @impl true
   def name, do: "here_maps"
 
   @impl true
-  def compute(query_str, _opts) do
-    query_str
-    |> fetch()
+  def compute(query_str, point, _opts) do
+    fetch(query_str, point)
     |> build_results()
   end
 
-  defp fetch(query) do
-    query
-    |> url()
+  defp fetch(query, point) do
+    url(query, point)
     |> HTTPoison.get()
     |> handle_response()
   end
 
-  defp url(input) do
+  defp url(query, point) do
     "#{@base}?" <>
-      URI.encode_query(q: "#{input} colombia", apiKey: api_key())
+      URI.encode_query(q: query, apiKey: api_key()) <>
+      "&in=countryCode:COL" <>
+      if String.length(point) > 0 do
+        "&at=#{point}"
+      else
+        ""
+      end
   end
 
   defp api_key, do: Application.fetch_env!(:carpooling, :here_maps)[:apikey]
@@ -38,12 +42,6 @@ defmodule Carpooling.Locations.HereMaps do
 
   def check_for_error(200), do: :ok
   def check_for_error(_), do: :error
-
-  # defp build_results(nil), do: []
-
-  # defp build_results(locations) do
-  #   [%Result{backend: __MODULE__, locations: locations}]
-  # end
 
   defp build_results({:ok, %{"items" => items}}) do
     locations =

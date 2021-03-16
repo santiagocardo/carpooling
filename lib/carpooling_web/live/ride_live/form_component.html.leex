@@ -28,6 +28,8 @@
 
   <%= hidden_input(f, :destination_zipcode) %>
 
+  <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 2 %>
+
   <%= label f, :date, "Fecha" %>
   <%= datetime_select f, :date %>
   <%= error_tag f, :date %>

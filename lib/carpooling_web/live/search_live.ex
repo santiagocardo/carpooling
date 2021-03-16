@@ -18,11 +18,18 @@ defmodule CarpoolingWeb.SearchLive do
   end
 
   @impl true
-  def handle_event("suggest", %{"origin" => origin, "destination" => destination}, socket) do
-    {origins, %{address: %{"postalCode" => origin_zipcode}}} = Locations.get_locations(origin)
+  def handle_event("suggest", params, socket) do
+    %{
+      "origin" => origin,
+      "destination" => destination,
+      "position" => position
+    } = params
+
+    {origins, %{address: %{"postalCode" => origin_zipcode}}} =
+      Locations.get_locations(origin, position)
 
     {destinations, %{address: %{"postalCode" => destination_zipcode}}} =
-      Locations.get_locations(destination)
+      Locations.get_locations(destination, position)
 
     {:noreply,
      assign(socket,
@@ -43,20 +50,23 @@ defmodule CarpoolingWeb.SearchLive do
     } = params
 
     results = Rides.get_rides_in_radius(origin_zipcode, destination_zipcode, 3)
-    results_count = Enum.count(results)
 
-    flash_msg =
-      "#{results_count} ruta#{
-        if results_count == 1 do
-          " encontrada"
-        else
-          "s encontradas"
-        end
-      } para tu destino!"
+    msg =
+      results
+      |> Enum.count()
+      |> build_msg()
 
     {:noreply,
      socket
-     |> put_flash(:info, flash_msg)
+     |> put_flash(:info, msg <> " para tu destino")
      |> assign(results: results)}
+  end
+
+  defp build_msg(num) do
+    case num do
+      0 -> "No se encontraron rutas"
+      1 -> "#{num} encontrada"
+      _ -> "#{num} encontradas"
+    end
   end
 end

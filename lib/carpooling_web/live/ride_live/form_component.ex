@@ -26,13 +26,14 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
   end
 
   @impl true
-  def handle_event("validate", %{"ride" => ride_params}, socket) do
+  def handle_event("validate", %{"ride" => ride_params, "position" => position}, socket) do
     %{"origin" => origin, "destination" => destination} = ride_params
 
-    {origins, %{address: %{"postalCode" => origin_zipcode}}} = Locations.get_locations(origin)
+    {origins, %{address: %{"postalCode" => origin_zipcode}}} =
+      Locations.get_locations(origin, position)
 
     {destinations, %{address: %{"postalCode" => destination_zipcode}}} =
-      Locations.get_locations(destination)
+      Locations.get_locations(destination, position)
 
     ride_params =
       Map.merge(ride_params, %{
@@ -54,8 +55,10 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
   end
 
   @impl true
-  def handle_event("save", %{"ride" => ride_params}, socket) do
-    case feed_locations(ride_params) do
+  def handle_event("save", params, socket) do
+    ride_params = params["ride"]
+
+    case feed_locations(params) do
       [{:ok, _}, {:ok, _}] ->
         save_ride(socket, socket.assigns.action, ride_params)
 
@@ -137,12 +140,17 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
     end
   end
 
-  def feed_locations(%{"origin_zipcode" => ""}), do: {:error, :missing_location}
-  def feed_locations(%{"destination_zipcode" => ""}), do: {:error, :missing_location}
+  def feed_locations(%{"ride" => %{"origin_zipcode" => ""}}), do: {:error, :missing_location}
+  def feed_locations(%{"ride" => %{"destination_zipcode" => ""}}), do: {:error, :missing_location}
 
-  def feed_locations(%{"origin" => origin, "destination" => destination}) do
-    {_origins, origin_location} = Locations.get_locations(origin)
-    {_destinations, destination_location} = Locations.get_locations(destination)
+  def feed_locations(%{"ride" => ride_params, "position" => position}) do
+    %{
+      "origin" => origin,
+      "destination" => destination
+    } = ride_params
+
+    {_origins, origin_location} = Locations.get_locations(origin, position)
+    {_destinations, destination_location} = Locations.get_locations(destination, position)
 
     [origin_location, destination_location]
     |> Enum.map(&map_and_feed_locations/1)

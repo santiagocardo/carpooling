@@ -36,6 +36,8 @@
       </datalist>
       <input id="destination" name="destination_zipcode" type="hidden" value="<%= @destination_zipcode %>">
 
+      <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 1 %>
+
       <button type="submit" phx-disable-with="Searching...">Buscar</button>
     </div>
   </form>
