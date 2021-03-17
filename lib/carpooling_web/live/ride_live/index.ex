@@ -74,7 +74,7 @@ defmodule CarpoolingWeb.RideLive.Index do
         |> assign(:page_title, "Editar Ruta")
         |> assign(:ride, ride)
 
-      _ ->
+      nil ->
         push_redirect(socket, to: Routes.ride_index_path(socket, :index))
     end
   end

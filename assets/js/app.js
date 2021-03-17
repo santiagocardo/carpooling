@@ -17,6 +17,8 @@ import { Socket } from "phoenix"
 import topbar from "topbar"
 import { LiveSocket } from "phoenix_live_view"
 
+const currentDatetime = document.getElementById("current-datetime")
+
 const setPosition = ({ coords }) => {
   const x = document.getElementById("current-position")
   x.value = coords.latitude + "," + coords.longitude
@@ -28,6 +30,16 @@ const Hooks = {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(setPosition)
       }
+    }
+  },
+  SetCurrentDateTime: {
+    mounted() {
+      const [date, time] = new Date()
+        .toLocaleString("en-GB", { hour12: false })
+        .split(', ')
+
+      const [day, month, year] = date.split('/')
+      currentDatetime.value = `${year}-${month}-${day} ${time}Z`
     }
   }
 }
@@ -51,4 +63,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-

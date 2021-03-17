@@ -13,6 +13,7 @@ defmodule Carpooling.Rides.Ride do
     field :seats, :integer
     field :verification_code, :integer
     field :phone, :string, virtual: true
+    field :current_datetime, :string, virtual: true
 
     has_many :users, Carpooling.Accounts.User
 
@@ -49,15 +50,15 @@ defmodule Carpooling.Rides.Ride do
     |> validate_length(:destination_zipcode, min: 5, max: 6)
     |> validate_zipcode(:origin)
     |> validate_zipcode(:destination)
-    |> validate_date(:date)
   end
 
   def create_changeset(ride, attrs) do
     ride
     |> changeset(attrs)
-    |> cast(attrs, [:phone])
-    |> validate_required([:phone])
+    |> cast(attrs, [:phone, :current_datetime])
+    |> validate_required([:phone, :current_datetime])
     |> validate_length(:phone, min: 10, max: 13)
+    |> validate_date(:date)
   end
 
   defp validate_zipcode(%Ecto.Changeset{errors: errors} = changeset, location) do
@@ -83,9 +84,9 @@ defmodule Carpooling.Rides.Ride do
 
   defp validate_date(%Ecto.Changeset{changes: changes} = changeset, field) do
     case changes do
-      %{date: date} ->
+      %{date: date, current_datetime: current_datetime} ->
         date = DateTime.from_naive!(date, "Etc/UTC")
-        today = DateTime.utc_now()
+        {:ok, today, _} = DateTime.from_iso8601(current_datetime)
 
         if DateTime.compare(date, today) == :lt do
           changeset

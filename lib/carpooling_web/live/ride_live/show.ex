@@ -22,8 +22,8 @@ defmodule CarpoolingWeb.RideLive.Show do
          |> assign(:page_title, "Ver Ruta")
          |> assign(:ride, ride)}
 
-      _ ->
-        push_redirect(socket, to: Routes.ride_index_path(socket, :index))
+      nil ->
+        {:noreply, push_redirect(socket, to: Routes.ride_index_path(socket, :index))}
     end
   end
 

@@ -34,6 +34,8 @@
   <%= datetime_select f, :date, value: DateTime.utc_now() %>
   <%= error_tag f, :date %>
 
+  <%= hidden_input(f, :current_datetime, id: "current-datetime", phx_hook: "SetCurrentDateTime") %>
+
   <%= label f, :seats, "Sillas Disponibles" %>
   <%= number_input f, :seats %>
   <%= error_tag f, :seats %>
