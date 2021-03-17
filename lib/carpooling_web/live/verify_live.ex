@@ -101,7 +101,7 @@ defmodule CarpoolingWeb.VerifyLive do
   defp apply_action(socket, :user, %{"id" => user_id}) do
     case Accounts.get_user(user_id) do
       nil ->
-        push_redirect(socket, to: Routes.search_path(socket, :index))
+        push_redirect(socket, to: Routes.ride_index_path(socket, :index))
 
       %{is_verified: true} = user ->
         flash_message_and_redirect(socket, :user, user.ride_id)
@@ -117,7 +117,7 @@ defmodule CarpoolingWeb.VerifyLive do
   defp apply_action(socket, :ride, %{"id" => ride_id}) do
     case Rides.get_ride(ride_id) do
       nil ->
-        push_redirect(socket, to: Routes.search_path(socket, :index))
+        push_redirect(socket, to: Routes.ride_index_path(socket, :index))
 
       %{is_verified: true} = ride ->
         flash_message_and_redirect(socket, :ride, ride.id)

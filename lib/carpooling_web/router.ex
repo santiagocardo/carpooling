@@ -17,8 +17,7 @@ defmodule CarpoolingWeb.Router do
   scope "/", CarpoolingWeb do
     pipe_through :browser
 
-    live "/", SearchLive, :index
-    live "/rutas", RideLive.Index, :index
+    live "/", RideLive.Index, :index
     live "/rutas/nueva", RideLive.Index, :new
     live "/rutas/:id/editar", RideLive.Index, :edit
     live "/rutas/:id/verificar", VerifyLive, :ride

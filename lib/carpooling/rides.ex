@@ -16,7 +16,13 @@ defmodule Carpooling.Rides do
 
   """
   def list_rides do
-    Repo.all(Ride)
+    query =
+      from ride in Ride,
+        where: ride.is_verified == true and ride.seats > 0,
+        limit: 10,
+        order_by: [{:desc, :date}]
+
+    Repo.all(query)
   end
 
   @doc """

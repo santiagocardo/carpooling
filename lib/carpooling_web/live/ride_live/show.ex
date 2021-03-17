@@ -23,7 +23,7 @@ defmodule CarpoolingWeb.RideLive.Show do
          |> assign(:ride, ride)}
 
       _ ->
-        push_redirect(socket, to: Routes.search_path(socket, :index))
+        push_redirect(socket, to: Routes.ride_index_path(socket, :index))
     end
   end
 

@@ -1,5 +1,3 @@
-<h1>Rutas Disponibles</h1>
-
 <%= if @live_action in [:new, :edit] do %>
   <%= live_modal @socket, CarpoolingWeb.RideLive.FormComponent,
     id: @ride.id || :new,
@@ -9,37 +7,80 @@
     return_to: Routes.ride_index_path(@socket, :index) %>
 <% end %>
 
-<table>
-  <thead>
-    <tr>
-      <th>Origen</th>
-      <th>Destino</th>
-      <th>Fecha</th>
-      <th>Sillas Disponibles</th>
-      <th>Aporte Solidario</th>
-      <th>Verificado</th>
+<section class="phx-hero">
+  <h1><%= gettext "%{name}!", name: "RideMe" %></h1>
+  <p>Transporte Solidario</p>
 
-      <th></th>
-    </tr>
-  </thead>
-  <tbody id="rides">
-    <%= for ride <- @rides do %>
-      <tr id="ride-<%= ride.id %>">
-        <td><%= ride.origin %></td>
-        <td><%= ride.destination %></td>
-        <td><%= ride.date %></td>
-        <td><%= ride.seats %></td>
-        <td><%= ride.cost %></td>
-        <td><%= ride.is_verified %></td>
+  <form phx-change="suggest" phx-submit="search">
+    <div class="form">
+      <input
+        type="text"
+        name="origin"
+        value="<%= @origin %>"
+        placeholder="Origen"
+        list="origins"
+        autocomplete="off"
+        phx-debounce="700"
+      />
+      <datalist id="origins">
+        <%= for place <- @origins do %>
+          <option value="<%= place.title %>"><%= place.title %></option>
+        <% end %>
+      </datalist>
+      <input id="origin" name="origin_zipcode" type="hidden" value="<%= @origin_zipcode %>">
 
-        <td>
-          <span><%= live_redirect "Show", to: Routes.ride_show_path(@socket, :show, ride) %></span>
-          <span><%= live_patch "Edit", to: Routes.ride_index_path(@socket, :edit, ride) %></span>
-          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: ride.id, data: [confirm: "Are you sure?"] %></span>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+      <input
+        type="text"
+        name="destination"
+        value="<%= @destination %>"
+        placeholder="Destino"
+        list="destinations"
+        autocomplete="off"
+        phx-debounce="700"
+      />
+      <datalist id="destinations">
+        <%= for place <- @destinations do %>
+          <option value="<%= place.title %>"><%= place.title %></option>
+        <% end %>
+      </datalist>
+      <input id="destination" name="destination_zipcode" type="hidden" value="<%= @destination_zipcode %>">
 
-<span><%= live_patch "Nueva Ruta", to: Routes.ride_index_path(@socket, :new) %></span>
+      <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 1 %>
+
+      <button type="submit" phx-disable-with="Searching...">Buscar</button>
+    </div>
+  </form>
+</section>
+
+<%= if Enum.count(@results) > 0 do %>
+  <section>
+    <table>
+      <thead>
+        <tr>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Fecha</th>
+          <th>Sillas Disponibles</th>
+          <th>Aporte Solidario</th>
+
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="rides">
+        <%= for ride <- @results do %>
+          <tr id="ride-<%= ride.id %>">
+            <td><%= ride.origin %></td>
+            <td><%= ride.destination %></td>
+            <td><%= ride.date %></td>
+            <td><%= ride.seats %></td>
+            <td><%= ride.cost %></td>
+
+            <td>
+              <%= live_redirect "Tomar!", to: Routes.ride_show_path(@socket, :show, ride), class: "button" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
+<% end %>

@@ -97,7 +97,7 @@ defmodule CarpoolingWeb.DeleteLive do
         {:noreply,
          socket
          |> put_flash(:info, "Ruta eliminada exitosamente!")
-         |> push_redirect(to: Routes.search_path(socket, :index))}
+         |> push_redirect(to: Routes.ride_index_path(socket, :index))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, :changeset, changeset)}
@@ -149,7 +149,7 @@ defmodule CarpoolingWeb.DeleteLive do
 
     socket
     |> put_flash(:info, msg)
-    |> push_redirect(to: Routes.search_path(socket, :index))
+    |> push_redirect(to: Routes.ride_index_path(socket, :index))
   end
 
   defp parse_code(code) do
