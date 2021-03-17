@@ -5,13 +5,6 @@ defmodule CarpoolingWeb.DeleteLive do
 
   @user_changeset Accounts.change_user(%Accounts.User{})
   @ride_changeset Rides.change_ride(%Rides.Ride{})
-  @invalid_code_changeset %Ecto.Changeset{
-    action: :validate,
-    errors: [
-      code: {"código de verificación inválido!", []}
-    ],
-    valid?: false
-  }
 
   @impl true
   def mount(_params, _session, socket) do
@@ -44,9 +37,11 @@ defmodule CarpoolingWeb.DeleteLive do
         {:ride, _} -> @ride_changeset
       end
 
+    socket = assign(socket, :changeset, changeset)
+
     case code < 1_000 do
       true ->
-        {:noreply, assign(socket, :changeset, changeset)}
+        {:noreply, socket}
 
       false ->
         validate_code(code, entity_tuple, socket)
@@ -65,7 +60,7 @@ defmodule CarpoolingWeb.DeleteLive do
         delete_entity(entity_id, entity, socket)
 
       _ ->
-        {:noreply, assign(socket, :changeset, invalid_code_changeset(entity))}
+        {:noreply, assign(socket, :changeset, invalid_code_changeset(socket.assigns.changeset))}
     end
   end
 
@@ -159,7 +154,9 @@ defmodule CarpoolingWeb.DeleteLive do
     end
   end
 
-  defp invalid_code_changeset(entity) do
-    Map.put(@invalid_code_changeset, :data, entity)
+  defp invalid_code_changeset(changeset) do
+    changeset
+    |> Ecto.Changeset.add_error(:code, "código de verificación inválido!")
+    |> Map.put(:action, :validate)
   end
 end

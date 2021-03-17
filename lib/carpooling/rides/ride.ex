@@ -49,6 +49,7 @@ defmodule Carpooling.Rides.Ride do
     |> validate_length(:destination_zipcode, min: 5, max: 6)
     |> validate_zipcode(:origin)
     |> validate_zipcode(:destination)
+    |> validate_date(:date)
   end
 
   def create_changeset(ride, attrs) do
@@ -71,10 +72,26 @@ defmodule Carpooling.Rides.Ride do
             changeset
 
           _ ->
-            errors = List.insert_at(errors, -1, {location, {"ubicación inválida", []}})
-
             changeset
-            |> Map.put(:errors, errors)
+            |> add_error(location, "ubicación inválida")
+        end
+
+      _ ->
+        changeset
+    end
+  end
+
+  defp validate_date(%Ecto.Changeset{changes: changes} = changeset, field) do
+    case changes do
+      %{date: date} ->
+        date = DateTime.from_naive!(date, "Etc/UTC")
+        today = DateTime.utc_now()
+
+        if DateTime.compare(date, today) == :lt do
+          changeset
+          |> add_error(field, "Fecha en el pasado")
+        else
+          changeset
         end
 
       _ ->

@@ -31,7 +31,7 @@
   <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 2 %>
 
   <%= label f, :date, "Fecha" %>
-  <%= datetime_select f, :date %>
+  <%= datetime_select f, :date, value: DateTime.utc_now() %>
   <%= error_tag f, :date %>
 
   <%= label f, :seats, "Sillas Disponibles" %>
