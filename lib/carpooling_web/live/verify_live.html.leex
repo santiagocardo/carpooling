@@ -1,7 +1,0 @@
-<h2><%= @page_title %></h2>
-
-<%= f = form_for @changeset, "#", phx_change: "validate" %>
-  <%= label f, :code, "Código de Verificación" %>
-  <%= text_input f, :code %>
-  <%= error_tag f, :code %>
-</form>

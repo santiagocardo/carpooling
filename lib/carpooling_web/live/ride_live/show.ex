@@ -52,7 +52,7 @@ defmodule CarpoolingWeb.RideLive.Show do
         {:noreply,
          socket
          |> put_flash(:info, "Ruta asignada exitosamente!")
-         |> push_redirect(to: Routes.verify_path(socket, :user, user.id))}
+         |> push_redirect(to: Routes.confirmation_action_path(socket, :user_verify, user.id))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}

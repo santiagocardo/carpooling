@@ -130,7 +130,9 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Ruta creada exitosamente!")
-         |> push_redirect(to: Routes.verify_path(socket, :ride, driver.ride_id))}
+         |> push_redirect(
+           to: Routes.confirmation_action_path(socket, :ride_verify, driver.ride_id)
+         )}
 
       _ ->
         {:noreply,
