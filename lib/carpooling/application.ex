@@ -9,6 +9,7 @@ defmodule Carpooling.Application do
     children = [
       # Start the Ecto repository
       Carpooling.Locations.Cache,
+      Carpooling.Cleanup,
       {Task.Supervisor, name: Carpooling.TaskSupervisor},
       Carpooling.Repo,
       # Start the Telemetry supervisor
