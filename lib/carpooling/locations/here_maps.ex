@@ -3,7 +3,8 @@ defmodule Carpooling.Locations.HereMaps do
 
   @behaviour Carpooling.Locations.Backend
 
-  @base "https://discover.search.hereapi.com/v1/discover"
+  @base_discover "https://discover.search.hereapi.com/v1/discover"
+  @base_geocode "https://geocode.search.hereapi.com/v1/geocode"
 
   @impl true
   def name, do: "here_maps"
@@ -21,14 +22,13 @@ defmodule Carpooling.Locations.HereMaps do
   end
 
   defp url(query, point) do
-    "#{@base}?" <>
-      URI.encode_query(q: query, apiKey: api_key()) <>
-      "&in=countryCode:COL" <>
-      if String.length(point) > 0 do
-        "&at=#{point}"
-      else
-        ""
-      end
+    query = URI.encode_query(q: query, apiKey: api_key()) <> "&in=countryCode:COL"
+
+    if String.length(point) > 0 do
+      "#{@base_discover}?#{query}&at=#{point}"
+    else
+      "#{@base_geocode}?#{query}"
+    end
   end
 
   defp api_key, do: Application.fetch_env!(:carpooling, :here_maps)[:apikey]
