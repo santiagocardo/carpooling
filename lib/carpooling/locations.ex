@@ -13,10 +13,6 @@ defmodule Carpooling.Locations do
   end
 
   defp search(query, point) do
-    if not CarpoolingWeb.Endpoint.config(:code_reloader) do
-      raise "action disabled when not in development"
-    end
-
     if String.length(query) >= 5 do
       compute(query, point, [])
       |> Enum.map(fn item -> item.locations end)
