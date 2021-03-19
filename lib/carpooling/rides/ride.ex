@@ -20,8 +20,7 @@ defmodule Carpooling.Rides.Ride do
     timestamps()
   end
 
-  @doc false
-  def changeset(ride, attrs) do
+  def base_changeset(ride, attrs) do
     ride
     |> cast(attrs, [
       :origin,
@@ -52,13 +51,21 @@ defmodule Carpooling.Rides.Ride do
     |> validate_zipcode(:destination)
   end
 
+  @doc false
+  def changeset(ride, attrs) do
+    ride
+    |> base_changeset(attrs)
+    |> cast(attrs, [:current_datetime])
+    |> validate_required([:current_datetime])
+    |> validate_date(:date)
+  end
+
   def create_changeset(ride, attrs) do
     ride
     |> changeset(attrs)
-    |> cast(attrs, [:phone, :current_datetime])
-    |> validate_required([:phone, :current_datetime])
+    |> cast(attrs, [:phone])
+    |> validate_required([:phone])
     |> validate_length(:phone, min: 10, max: 13)
-    |> validate_date(:date)
   end
 
   defp validate_zipcode(%Ecto.Changeset{errors: errors} = changeset, location) do

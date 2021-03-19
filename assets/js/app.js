@@ -17,8 +17,6 @@ import { Socket } from "phoenix"
 import topbar from "topbar"
 import { LiveSocket } from "phoenix_live_view"
 
-const currentDatetime = document.getElementById("current-datetime")
-
 const setPosition = ({ coords }) => {
   const x = document.getElementById("current-position")
   x.value = coords.latitude + "," + coords.longitude
@@ -34,6 +32,7 @@ const Hooks = {
   },
   SetCurrentDateTime: {
     mounted() {
+      const currentDatetime = document.getElementById("current-datetime")
       const [date, time] = new Date()
         .toLocaleString("en-GB", { hour12: false })
         .split(', ')

@@ -4,7 +4,7 @@ defmodule CarpoolingWeb.ConfirmationActionLive do
   alias Carpooling.{Rides, Accounts}
 
   @user_changeset Accounts.change_user(%Accounts.User{})
-  @ride_changeset Rides.change_ride(%Rides.Ride{})
+  @ride_changeset Rides.Ride.base_changeset(%Rides.Ride{}, %{})
 
   @impl true
   def mount(_params, _session, socket) do
@@ -68,7 +68,7 @@ defmodule CarpoolingWeb.ConfirmationActionLive do
   defp do_entity_action(:user_delete, user, socket) do
     case Accounts.delete_user(user) do
       {:ok, _user} ->
-        case Rides.update_ride(user.ride, %{"seats" => user.ride.seats + 1}) do
+        case Rides.update_ride_seats(user.ride, :inc) do
           {:ok, _ride} ->
             {:noreply,
              socket
@@ -90,7 +90,7 @@ defmodule CarpoolingWeb.ConfirmationActionLive do
   defp do_entity_action(:user_verify, user, socket) do
     case Accounts.update_user(user, %{"is_verified" => true}) do
       {:ok, _user} ->
-        case Rides.update_ride(user.ride, %{"seats" => user.ride.seats - 1}) do
+        case Rides.update_ride_seats(user.ride, :dec) do
           {:ok, _ride} ->
             {:noreply,
              socket
@@ -123,7 +123,7 @@ defmodule CarpoolingWeb.ConfirmationActionLive do
   end
 
   defp do_entity_action(:ride_verify, ride, socket) do
-    case Rides.update_ride(ride, %{"is_verified" => true}) do
+    case Rides.verify_ride(ride) do
       {:ok, _ride} ->
         {:noreply,
          socket

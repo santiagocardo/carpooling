@@ -79,6 +79,22 @@ defmodule Carpooling.Rides do
     |> Repo.update()
   end
 
+  def update_ride_seats(%Ride{} = ride, :inc),
+    do:
+      ride
+      |> change_ride_seats(ride.seats + 1)
+
+  def update_ride_seats(%Ride{} = ride, :dec),
+    do:
+      ride
+      |> change_ride_seats(ride.seats - 1)
+
+  def verify_ride(%Ride{} = ride) do
+    ride
+    |> Ride.base_changeset(%{"is_verified" => true})
+    |> Repo.update()
+  end
+
   @doc """
   Deletes a ride.
 
@@ -105,7 +121,7 @@ defmodule Carpooling.Rides do
 
   """
   def change_ride(%Ride{} = ride, attrs \\ %{}) do
-    Ride.create_changeset(ride, attrs)
+    Ride.changeset(ride, attrs)
   end
 
   def get_rides_in_radius(origin_zipcode, destination_zipcode, radius_in_miles) do
@@ -130,5 +146,11 @@ defmodule Carpooling.Rides do
       {:ok, zip_codes} -> Enum.map(zip_codes, & &1.zip_code)
       error -> error
     end
+  end
+
+  def change_ride_seats(%Ride{} = ride, seats) do
+    ride
+    |> Ride.base_changeset(%{"seats" => seats})
+    |> Repo.update()
   end
 end

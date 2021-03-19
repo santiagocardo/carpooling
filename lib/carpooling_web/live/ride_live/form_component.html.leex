@@ -31,10 +31,10 @@
   <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 2 %>
 
   <%= label f, :date, "Fecha" %>
-  <%= datetime_select f, :date, value: DateTime.utc_now() %>
+  <%= datetime_select f, :date, default: DateTime.utc_now() %>
   <%= error_tag f, :date %>
 
-  <%= hidden_input(f, :current_datetime, id: "current-datetime", phx_hook: "SetCurrentDateTime") %>
+  <%= hidden_input(f, :current_datetime, id: "current-datetime", phx_update: "ignore",  phx_hook: "SetCurrentDateTime") %>
 
   <%= label f, :seats, "Sillas Disponibles" %>
   <%= number_input f, :seats %>
