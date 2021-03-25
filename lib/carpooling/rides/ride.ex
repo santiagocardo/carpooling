@@ -65,7 +65,7 @@ defmodule Carpooling.Rides.Ride do
     |> changeset(attrs)
     |> cast(attrs, [:phone])
     |> validate_required([:phone])
-    |> validate_length(:phone, min: 10, max: 13)
+    |> validate_length(:phone, min: 10, max: 10)
   end
 
   defp validate_zipcode(%Ecto.Changeset{errors: errors} = changeset, location) do

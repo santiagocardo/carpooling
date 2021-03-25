@@ -3,6 +3,7 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
 
   alias Carpooling.{Rides, Locations, ZipCodes, Accounts}
 
+  @wa_url "https://api.whatsapp.com"
   @invalid_code_changeset %Ecto.Changeset{
     action: :validate,
     errors: [
@@ -117,22 +118,21 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
           pickup_location: "driver location"
         }
 
-        create_driver_and_redirect(driver, socket)
+        create_wa_url(ride, driver)
+        |> create_driver_and_redirect(driver, socket)
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
     end
   end
 
-  defp create_driver_and_redirect(driver, socket) do
+  defp create_driver_and_redirect(ride_wa_url, driver, socket) do
     case Accounts.create_user(driver) do
       {:ok, _user} ->
         {:noreply,
          socket
          |> put_flash(:info, "Ruta creada exitosamente!")
-         |> push_redirect(
-           to: Routes.confirmation_action_path(socket, :ride_verify, driver.ride_id)
-         )}
+         |> redirect(external: ride_wa_url)}
 
       _ ->
         {:noreply,
@@ -194,4 +194,22 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
       {num, _} -> num
     end
   end
+
+  defp create_wa_url(ride, driver) do
+    ride_path = "#{app_url()}/rutas/#{driver.ride_id}"
+    text = "Transporte Solidario: Nueva Ruta Creada
+      📍 Ruta: #{ride.origin} - #{ride.destination}
+      ⏰ Fecha y hora: #{ride.date}
+
+      Tu código de verificación es: #{driver.verification_code}
+      Recuerda verificar tu ruta ingresando a: #{ride_path}/verificar
+
+      Para ver esta ruta ingresa a: #{ride_path}
+      Para editar esta ruta ingresa a: #{ride_path}/editar
+      Para eliminar esta ruta ingresa a: #{ride_path}/eliminar"
+
+    "#{@wa_url}/send?" <> URI.encode_query(phone: "+57#{driver.phone}", text: text)
+  end
+
+  defp app_url, do: Application.fetch_env!(:carpooling, :server)[:app_url]
 end

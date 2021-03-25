@@ -19,7 +19,7 @@ defmodule Carpooling.Accounts.User do
     user
     |> cast(attrs, [:phone, :pickup_location])
     |> validate_required([:phone, :pickup_location])
-    |> validate_length(:phone, min: 10, max: 13)
+    |> validate_length(:phone, min: 10, max: 10)
     |> validate_length(:pickup_location, min: 5, max: 20)
   end
 

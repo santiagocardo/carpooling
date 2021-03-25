@@ -47,3 +47,11 @@ here_maps_apikey =
     """
 
 config :carpooling, :here_maps, apikey: here_maps_apikey
+
+app_url =
+  System.get_env("APP_URL") ||
+    raise """
+    environment variable APP_URL is missing.
+    """
+
+config :carpooling, :server, app_url: app_url

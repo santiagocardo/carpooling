@@ -4,7 +4,7 @@ defmodule Carpooling.Rides do
   """
 
   import Ecto.Query, warn: false
-  alias Carpooling.{Rides.Ride, Repo, ZipCodes}
+  alias Carpooling.{Rides.Ride, Repo, ZipCodes, Accounts.User}
 
   @doc """
   Returns the list of rides.
@@ -41,7 +41,12 @@ defmodule Carpooling.Rides do
   """
   def get_ride!(id), do: Repo.get!(Ride, id)
 
-  def get_ride(id), do: Repo.get(Ride, id)
+  def get_ride(id) do
+    driver_query = from u in User, where: u.role == "driver"
+
+    Repo.get(Ride, id)
+    |> Repo.preload(users: driver_query)
+  end
 
   @doc """
   Creates a ride.

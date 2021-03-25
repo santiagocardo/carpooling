@@ -3,6 +3,8 @@ defmodule CarpoolingWeb.RideLive.Show do
 
   alias Carpooling.{Rides, Accounts, Accounts.User}
 
+  @wa_url "https://api.whatsapp.com"
+
   @impl true
   def mount(_params, _session, socket) do
     changeset = Accounts.change_user(%User{})
@@ -49,13 +51,36 @@ defmodule CarpoolingWeb.RideLive.Show do
 
     case Accounts.create_user(user_params) do
       {:ok, user} ->
+        url = create_wa_url(socket.assigns.ride, user)
+
         {:noreply,
          socket
          |> put_flash(:info, "Ruta asignada exitosamente!")
-         |> push_redirect(to: Routes.confirmation_action_path(socket, :user_verify, user.id))}
+         |> redirect(external: url)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
     end
   end
+
+  defp create_wa_url(ride, user) do
+    user_path = "#{app_url()}/usuario/#{user.id}"
+    driver = Enum.at(ride.users, 0)
+
+    text =
+      "Transporte Solidario: Solicitud de Ruta
+      📍 Ruta: #{ride.origin} - #{ride.destination}
+      ⏰ Fecha y hora: #{ride.date}
+
+      🖐 Hola! Me gustaría viajar contigo. Este es mi link para verificarme como pasajero: #{
+        user_path
+      }/verificar
+
+      📱 Este es mi WhatsApp: +57#{user.phone}
+      🚏 Mi punto de recogida: #{user.pickup_location}"
+
+    "#{@wa_url}/send?" <> URI.encode_query(phone: "+57#{driver.phone}", text: text)
+  end
+
+  defp app_url, do: Application.fetch_env!(:carpooling, :server)[:app_url]
 end

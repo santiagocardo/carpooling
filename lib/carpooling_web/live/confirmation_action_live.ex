@@ -51,9 +51,9 @@ defmodule CarpoolingWeb.ConfirmationActionLive do
 
   defp validate_code(code, {entity_action, entity}, socket) do
     verification_code =
-      case entity_action do
-        :user_delete -> entity.ride.verification_code
-        _ -> entity.verification_code
+      case entity_action in [:user_delete, :user_verify] do
+        false -> entity.verification_code
+        _ -> entity.ride.verification_code
       end
 
     case verification_code == code do

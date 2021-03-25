@@ -83,3 +83,5 @@ here_maps_apikey =
     """
 
 config :carpooling, :here_maps, apikey: here_maps_apikey
+
+config :carpooling, :server, app_url: "http://localhost:4000"
