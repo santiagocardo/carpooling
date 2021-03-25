@@ -12,7 +12,7 @@
   <p>Transporte Solidario</p>
 
   <form phx-change="suggest" phx-submit="search">
-    <div class="form">
+    <div class="form-group">
       <input
         type="text"
         name="origin"
@@ -44,11 +44,11 @@
         <% end %>
       </datalist>
       <input id="destination" name="destination_zipcode" type="hidden" value="<%= @destination_zipcode %>">
-
-      <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 1 %>
-
-      <button type="submit" phx-disable-with="Searching...">Buscar</button>
     </div>
+
+    <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 1 %>
+
+    <button type="submit" phx-disable-with="Searching...">Buscar</button>
   </form>
 </section>
 
