@@ -153,7 +153,7 @@ defmodule Carpooling.Rides do
     end
   end
 
-  def change_ride_seats(%Ride{} = ride, seats) do
+  defp change_ride_seats(%Ride{} = ride, seats) do
     ride
     |> Ride.base_changeset(%{"seats" => seats})
     |> Repo.update()

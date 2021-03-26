@@ -44,7 +44,7 @@ defmodule CarpoolingWeb.RideLive.FormComponent do
 
     changeset =
       socket.assigns.ride
-      |> Rides.change_ride(ride_params)
+      |> Rides.Ride.create_changeset(ride_params)
       |> Map.put(:action, :validate)
 
     {:noreply,

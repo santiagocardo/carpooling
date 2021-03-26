@@ -11,7 +11,7 @@ defmodule CarpoolingWeb.ModalComponent do
       phx-target="#<%= @id %>"
       phx-page-loading>
 
-      <div class="phx-modal-content">
+      <div class="w-4/5 p-6 my-2/5 my-8 mx-auto bg-white shadow-md rounded-lg">
         <%= live_patch raw("&times;"), to: @return_to, class: "phx-modal-close" %>
         <%= live_component @socket, @component, @opts %>
       </div>

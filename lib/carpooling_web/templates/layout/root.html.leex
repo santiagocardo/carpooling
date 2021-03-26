@@ -11,19 +11,46 @@
   </head>
   <body>
     <header>
-      <section class="container">
-        <nav role="navigation">
-          <ul>
-            <%= live_patch "Crear Ruta", to: Routes.ride_index_path(@conn, :new) %>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
-            <% end %>
-          </ul>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
-        </a>
-      </section>
+      <nav class="bg-blue-50 w-full flex relative justify-between items-center px-8 h-20 shadow-lg">
+        <!-- logo -->
+        <div class="inline-flex">
+          <%= live_patch to: Routes.ride_index_path(@conn, :index) do %>
+            <div class="">
+              <svg width="102" height="32" fill="currentcolor" style="display: block">
+                <path stroke="#A9C7D8" stroke-linecap="square" d="M1,26 L56.0090902,26"/>
+                <path fill="#49A25A" stroke="#49A25A" stroke-linecap="round" d="M0,11.5829451 L11.8845968,1.44021509e-12 L31.6546841,6.82121026e-13 L39.2181462,9.31293561 L55.011955,11.3291538 C56.1099219,11.4693189 56.7013807,12.4267805 56.3342028,13.4643484 L54,20.0603157 L4,20.0603157 L0,11.5829451 Z"/>
+                <circle cx="13" cy="21" r="5" fill="#618287" stroke="#456782" stroke-linecap="round"/>
+                <circle cx="45" cy="21" r="5" fill="#618287" stroke="#456782" stroke-linecap="round"/>
+                <path stroke="#FFDC82" stroke-linecap="square" d="M8,10 L34,10"/>
+              </svg>
+            </div>
+          <% end %>
+        </div>
+        <!-- end logo -->
+
+        <!-- create ride -->
+        <div class="flex-initial">
+          <div class="flex justify-end items-center relative">
+
+            <div class="block">
+              <div class="inline relative">
+                <%= live_patch to: Routes.ride_index_path(@conn, :new) do %>
+                  <button type="button" class="bg-blue-500 text-white inline-flex items-center relative px-2 border rounded-full hover:shadow-md hover:bg-blue-600 transition ease-out duration-200">
+                    <span class="p-1">Crear Ruta</span>
+                    <div class="block flex-grow-0 flex-shrink-0 h-8 w-8">
+                      <svg class="w-full h-full p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                    </div>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- end create ride -->
+      </nav>
     </header>
     <%= @inner_content %>
   </body>

@@ -1,4 +1,4 @@
-<h2><%= @title %></h2>
+<h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900"><%= @title %></h1>
 
 <%= f = form_for @changeset, "#",
   id: "ride-form",
@@ -6,55 +6,88 @@
   phx_change: "validate",
   phx_submit: "save" %>
 
-  <%= label f, :origin, "Origen" %>
-  <%= text_input f, :origin, phx_debounce: 700, list: "origins", autocomplete: "off" %>
-  <%= error_tag f, :origin %>
-  <datalist id="origins">
-    <%= for place <- @origins do %>
-      <option value="<%= place.title %>"><%= place.title %></option>
-    <% end %>
-  </datalist>
+  <div class="flex flex-col my-2">
+    <div class="-mx-3 md:flex mb-6">
+      <div class="md:w-1/2 px-3 mb-6 md:mb-0">
+        <%= label f, :origin, "Origen", class: "block tracking-wide text-grey-darker text-xs font-bold mb-2" %>
+        <%= text_input f, :origin,
+          phx_debounce: 700,
+          list: "origins",
+          autocomplete: "off",
+          class: "appearance-none w-full bg-gray-100 rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+        %>
+        <%= error_tag f, :origin %>
+        <datalist id="origins">
+          <%= for place <- @origins do %>
+            <option value="<%= place.title %>"><%= place.title %></option>
+          <% end %>
+        </datalist>
+      </div>
+      <div class="md:w-1/2 px-3">
+        <%= label f, :destination, "Destino", class: "block tracking-wide text-grey-darker text-xs font-bold mb-2" %>
+        <%= text_input f, :destination,
+          phx_debounce: 700,
+          list: "destinations",
+          autocomplete: "off",
+          class: "appearance-none w-full bg-gray-100 rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+        %>
+        <%= error_tag f, :destination %>
+        <datalist id="destinations">
+          <%= for place <- @destinations do %>
+            <option value="<%= place.title %>"><%= place.title %></option>
+          <% end %>
+        </datalist>
+      </div>
+    </div>
+    <div class="-mx-3 md:flex mb-6">
+      <div class="md:w-1/2 px-3 mb-6 md:mb-0">
+        <%= label f, :date, "Fecha y Hora", class: "block tracking-wide text-grey-darker text-xs font-bold mb-2" %>
+        <%= datetime_local_input f, :date,
+          default: DateTime.utc_now(),
+          class: "appearance-none w-full bg-gray-100 rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+        %>
+        <%= error_tag f, :date %>
+      </div>
+      <div class="md:w-1/2 px-3">
+        <%= label f, :seats, "Sillas Disponibles", class: "block tracking-wide text-grey-darker text-xs font-bold mb-2" %>
+        <%= number_input f, :seats,
+          class: "appearance-none w-full bg-gray-100 rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+        %>
+        <%= error_tag f, :seats %>
+      </div>
+    </div>
+    <div class="-mx-3 md:flex mb-6">
+      <div class="md:w-1/2 px-3 mb-6 md:mb-0">
+        <%= label f, :cost, "Aporte Solidario", class: "block tracking-wide text-grey-darker text-xs font-bold mb-2" %>
+        <%= number_input f, :cost,
+          class: "appearance-none w-full bg-gray-100 rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+        %>
+        <%= error_tag f, :cost %>
+      </div>
+      <div class="md:w-1/2 px-3">
+        <%= if @action == :new do %>
+          <%= label f, :phone, "WhatsApp", class: "block tracking-wide text-grey-darker text-xs font-bold mb-2" %>
+          <%= telephone_input f, :phone,
+            class: "appearance-none w-full bg-gray-100 rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+          %>
+          <%= error_tag f, :phone %>
+        <% end %>
+
+        <%= if @action == :edit do %>
+          <%= label f, :code, "Código de Verificación", class: "block tracking-wide text-grey-darker text-xs font-bold mb-2" %>
+          <%= text_input f, :code,
+            class: "appearance-none w-full bg-gray-100 rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+          %>
+          <%= error_tag f, :code %>
+        <% end %>
+      </div>
+    </div>
+  </div>
 
   <%= hidden_input(f, :origin_zipcode) %>
-
-  <%= label f, :destination, "Destino" %>
-  <%= text_input f, :destination, phx_debounce: 700, list: "destinations", autocomplete: "off" %>
-  <%= error_tag f, :destination %>
-  <datalist id="destinations">
-    <%= for place <- @destinations do %>
-      <option value="<%= place.title %>"><%= place.title %></option>
-    <% end %>
-  </datalist>
-
   <%= hidden_input(f, :destination_zipcode) %>
-
+  <%= hidden_input(f, :current_datetime, id: "current-datetime", phx_update: "ignore",  phx_hook: "SetCurrentDateTime") %>
   <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 2 %>
 
-  <%= label f, :date, "Fecha" %>
-  <%= datetime_select f, :date, default: DateTime.utc_now() %>
-  <%= error_tag f, :date %>
-
-  <%= hidden_input(f, :current_datetime, id: "current-datetime", phx_update: "ignore",  phx_hook: "SetCurrentDateTime") %>
-
-  <%= label f, :seats, "Sillas Disponibles" %>
-  <%= number_input f, :seats %>
-  <%= error_tag f, :seats %>
-
-  <%= label f, :cost, "Aporte Solidario" %>
-  <%= number_input f, :cost %>
-  <%= error_tag f, :cost %>
-
-  <%= if @action == :new do %>
-    <%= label f, :phone, "WhatsApp" %>
-    <%= telephone_input f, :phone %>
-    <%= error_tag f, :phone %>
-  <% end %>
-
-  <%= if @action == :edit do %>
-    <%= label f, :code, "Código de Verificación" %>
-    <%= text_input f, :code %>
-    <%= error_tag f, :code %>
-  <% end %>
-
-  <%= submit "Save", phx_disable_with: "Saving..." %>
+  <%= submit "Anunciar", phx_disable_with: "Anunciando...", class: "py-2 w-full rounded-md text-blue-500 border border-blue-500 sm:text-white sm:bg-blue-500 sm:hover:bg-blue-600 duration-300 sm:text-sm font-bold hover:opacity-100" %>
 </form>

@@ -7,80 +7,106 @@
     return_to: Routes.ride_index_path(@socket, :index) %>
 <% end %>
 
-<section class="phx-hero">
-  <h1><%= gettext "%{name}!", name: "RideMe" %></h1>
-  <p>Transporte Solidario</p>
-
-  <form phx-change="suggest" phx-submit="search">
-    <div class="form-group">
-      <input
-        type="text"
-        name="origin"
-        value="<%= @origin %>"
-        placeholder="Origen"
-        list="origins"
-        autocomplete="off"
-        phx-debounce="700"
-      />
-      <datalist id="origins">
-        <%= for place <- @origins do %>
-          <option value="<%= place.title %>"><%= place.title %></option>
-        <% end %>
-      </datalist>
-      <input id="origin" name="origin_zipcode" type="hidden" value="<%= @origin_zipcode %>">
-
-      <input
-        type="text"
-        name="destination"
-        value="<%= @destination %>"
-        placeholder="Destino"
-        list="destinations"
-        autocomplete="off"
-        phx-debounce="700"
-      />
-      <datalist id="destinations">
-        <%= for place <- @destinations do %>
-          <option value="<%= place.title %>"><%= place.title %></option>
-        <% end %>
-      </datalist>
-      <input id="destination" name="destination_zipcode" type="hidden" value="<%= @destination_zipcode %>">
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-12 mx-auto">
+    <div class="flex flex-col text-center w-full mb-6">
+      <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">Transporte Solidario</h1>
+      <p class="lg:w-2/3 mx-auto leading-relaxed text-base">Buscar una ruta para compartir</p>
     </div>
+    <form phx-change="suggest" phx-submit="search">
+      <div class="flex lg:w-2/3 w-full sm:flex-row flex-col mx-auto px-8 sm:space-x-4 sm:space-y-0 space-y-4 sm:px-0 items-end">
 
-    <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 1 %>
+        <div class="relative flex-grow w-full">
+          <input
+            type="text"
+            name="origin"
+            value="<%= @origin %>"
+            placeholder="Origen"
+            list="origins"
+            autocomplete="off"
+            phx-debounce="700"
+            class="bg-gray-100 w-full rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+          />
+          <datalist id="origins">
+            <%= for place <- @origins do %>
+              <option value="<%= place.title %>"><%= place.title %></option>
+            <% end %>
+          </datalist>
+        </div>
+        <div class="relative flex-grow w-full">
+          <input
+            type="text"
+            name="destination"
+            value="<%= @destination %>"
+            placeholder="Destino"
+            list="destinations"
+            autocomplete="off"
+            phx-debounce="700"
+            class="bg-gray-100 w-full rounded border border-gray-300 focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+          />
+          <datalist id="destinations">
+            <%= for place <- @destinations do %>
+              <option value="<%= place.title %>"><%= place.title %></option>
+            <% end %>
+          </datalist>
+        </div>
 
-    <button type="submit" phx-disable-with="Searching...">Buscar</button>
-  </form>
+        <input id="origin" name="origin_zipcode" type="hidden" value="<%= @origin_zipcode %>">
+
+        <input id="destination" name="destination_zipcode" type="hidden" value="<%= @destination_zipcode %>">
+
+        <%= live_component @socket, CarpoolingWeb.PositionComponent, id: 1 %>
+
+        <button type="submit" phx-disable-with="Buscando..." class="text-white bg-blue-500 border-1 py-2 px-8 focus:outline-none hover:bg-blue-600 rounded text-lg">Buscar</button>
+      </div>
+    </form>
+  </div>
 </section>
 
 <%= if Enum.count(@results) > 0 do %>
-  <section>
-    <table>
-      <thead>
-        <tr>
-          <th>Origen</th>
-          <th>Destino</th>
-          <th>Fecha</th>
-          <th>Sillas Disponibles</th>
-          <th>Aporte Solidario</th>
+  <section class="bg-gray-100 py-8">
+    <div class="grid mx-4 sm:mx-20">
+      <!-- Question Listing Item Card -->
+      <%= for ride <- @results do %>
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-lg duration-500 px-2 sm:px-6 md:px-2 py-4 my-2">
+          <div class="grid grid-cols-12 gap-3">
+            <!-- Meta Column -->
+            <div class="col-span-4 sm:col-span-2 text-center">
+              <!-- Answer Counts -->
+              <span class="grid grid-rows-2 mx-auto py-1 w-4/5 2lg:w-3/5 rounded-md bg-<%= if ride.seats == 1 do "yellow" else "green" end %>-400">
+                <div class="inline-block font-medium sm:text-2xl text-white"><%= ride.seats %></div>
 
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="rides">
-        <%= for ride <- @results do %>
-          <tr id="ride-<%= ride.id %>">
-            <td><%= ride.origin %></td>
-            <td><%= ride.destination %></td>
-            <td><%= ride.date %></td>
-            <td><%= ride.seats %></td>
-            <td><%= ride.cost %></td>
+                <div class="inline-block font-medium text-white mx-1 text-xs md:text-sm lg:text-md">
+                  Asiento<%= if ride.seats == 1 do "" else "s" end %>
+                </div>
+              </span>
 
-            <td>
-              <%= live_redirect "Tomar!", to: Routes.ride_show_path(@socket, :show, ride), class: "button" %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+              <!-- View Counts -->
+              <div class="grid mt-3">
+                <span class="inline-block font-bold text-xs"> $ <%= ride.cost %> </span>
+              </div>
+            </div>
+
+            <!-- Summary Column -->
+            <div class="col-span-8 sm:col-span-7">
+              <div class="">
+                <p class="text-xs sm:text-sm md:text-md lg:text-lg text-gray-700 font-bold"><strong>Origen: </strong> <%= ride.origin %></p>
+                <p class="text-xs sm:text-sm md:text-md lg:text-lg text-gray-700 font-bold"><strong>Destino: </strong> <%= ride.destination %></p>
+              </div>
+
+              <div class="flex justify-between items-center mt-2">
+                <span class="font-light text-xs sm:text-sm text-gray-600"> <strong>Salida: </strong> <%= ride.date %> </span>
+              </div>
+            </div>
+            <div class="col-span-12 sm:col-span-3 mx-auto my-auto">
+              <%= live_redirect "Tomar",
+                to: Routes.ride_show_path(@socket, :show, ride),
+                class: "sm:py-3 sm:px-8 rounded-md text-blue-500 sm:text-white sm:bg-blue-500 sm:hover:bg-blue-600 duration-300 sm:text-sm font-bold hover:opacity-100"
+              %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
   </section>
 <% end %>
